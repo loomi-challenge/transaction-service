@@ -1,7 +1,7 @@
-import { Transaction } from "../entities/Transaction";
+import { ITransaction } from "../entities/Transaction/interfaces/transaction.interface";
 
-export interface TransactionGateway {
-  createTransaction(transaction: Transaction): Promise<void>;
-  findTransactionById(id: string): Promise<Transaction>;
-  getListUserTransactions(userId: string): Promise<Transaction[]>;
+export interface ITransactionGateway {
+  createTransaction(data: ITransaction): Promise<void>;
+  findTransactionById(id: string): Promise<ITransaction | null>;
+  getListUserTransactions(userId: string): Promise<ITransaction[]>;
 }
