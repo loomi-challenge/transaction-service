@@ -3,6 +3,7 @@ import { IUseCase } from "../IUsecase";
 import { Transaction } from "@/domain/entities/Transaction";
 import { randomUUID } from "crypto";
 import { IUserValidationGateway } from "@/domain/gateways/user-validation.gateway";
+import { IUserBalanceGateway } from "@/domain/gateways/user-balance.gateway";
 
 interface CreateTransactionInput {
   senderUserId: string;
@@ -24,7 +25,8 @@ export class CreateTransactionUseCase
 {
   constructor(
     private readonly transactionGateway: ITransactionGateway,
-    private readonly userValidationGateway: IUserValidationGateway
+    private readonly userValidationGateway: IUserValidationGateway,
+    private readonly userBalanceGateway: IUserBalanceGateway
   ) {}
 
   async execute(
@@ -48,6 +50,12 @@ export class CreateTransactionUseCase
       updatedAt: now,
     });
     await this.transactionGateway.createTransaction(transaction);
+
+    await this.userBalanceGateway.updateUserBalance({
+      senderUserId: input.senderUserId,
+      receiverUserId: input.receiverUserId,
+      amount: input.amount,
+    });
 
     return transaction;
   }
