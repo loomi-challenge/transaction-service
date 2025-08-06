@@ -17,7 +17,7 @@ export class FindTransactionUseCase
   async execute(id: string): Promise<FindTransactionOutput | null> {
     const transaction = await this.transactionGateway.findTransactionById(id);
     if (!transaction) {
-      return null;
+      throw new Error("Transação não encontrada");
     }
     return {
       id: transaction.id,

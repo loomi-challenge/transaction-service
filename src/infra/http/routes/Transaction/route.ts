@@ -28,7 +28,8 @@ const findTransactionController = new FindTransactionController(
 );
 
 const listUserTransactionsUseCase = new ListUserTransactionsUseCase(
-  transactionRepository
+  transactionRepository,
+  userValidationGateway
 );
 const listUserTransactionsController = new ListUserTransactionsController(
   listUserTransactionsUseCase

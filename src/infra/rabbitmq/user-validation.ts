@@ -13,8 +13,8 @@ export class RabbitUserValidationGateway implements IUserValidationGateway {
     this.channel = await this.connection.createChannel();
   }
 
-  async validateUsers(senderId: string, receiverId: string): Promise<boolean> {
-    console.log("🔍 Starting user validation for:", { senderId, receiverId });
+  async validateUsers(userIds: string[]): Promise<boolean> {
+    console.log("🔍 Starting user validation for:", { userIds });
     
     if (!this.channel) {
       console.log("📡 Connecting to RabbitMQ...");
@@ -45,7 +45,7 @@ export class RabbitUserValidationGateway implements IUserValidationGateway {
               const content = JSON.parse(msg.content.toString());
               console.log("📋 RabbitMQ response content:", content);
               
-              const isValid = Boolean(content?.valid);
+              const isValid = Boolean(content?.allValid);
               console.log("✅ Validation result:", isValid);
               resolve(isValid);
             } catch (error) {
@@ -63,8 +63,7 @@ export class RabbitUserValidationGateway implements IUserValidationGateway {
         this.rpcQueue,
         Buffer.from(
           JSON.stringify({
-            senderUserId: senderId,
-            receiverUserId: receiverId,
+            userIds,
           })
         ),
         {

@@ -48,6 +48,7 @@ export class CreateTransactionUseCase
       updatedAt: now,
     });
     await this.transactionGateway.createTransaction(transaction);
+
     return transaction;
   }
 
@@ -55,16 +56,15 @@ export class CreateTransactionUseCase
     senderUserId: string,
     receiverUserId: string
   ): Promise<boolean> {
-    
     if (senderUserId === receiverUserId) {
       return false;
     }
 
     try {
-      const isValid = await this.userValidationGateway.validateUsers(
+      const isValid = await this.userValidationGateway.validateUsers([
         senderUserId,
-        receiverUserId
-      );
+        receiverUserId,
+      ]);
       return isValid;
     } catch (error) {
       return false;
