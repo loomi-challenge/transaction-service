@@ -1,3 +1,4 @@
+import { IUserValidationGateway } from "@/domain/gateways/user-validation.gateway";
 import { IUseCase } from "../IUsecase";
 import { ITransactionGateway } from "@/domain/gateways/transaction.gateway";
 
@@ -12,9 +13,16 @@ interface ListUserTransactionsOutput {
 export class ListUserTransactionsUseCase
   implements IUseCase<string, ListUserTransactionsOutput[]>
 {
-  constructor(private readonly transactionGateway: ITransactionGateway) {}
+  constructor(
+    private readonly transactionGateway: ITransactionGateway,
+    private readonly userGateway: IUserValidationGateway
+  ) {}
 
   async execute(userId: string): Promise<ListUserTransactionsOutput[]> {
+    const isValid = await this.validateUser(userId);
+    if (!isValid) {
+      throw new Error("Usuário não encontrado");
+    }
     const transactions = await this.transactionGateway.getListUserTransactions(
       userId
     );
@@ -25,5 +33,14 @@ export class ListUserTransactionsUseCase
       amount: transaction.amount,
       description: transaction.description,
     }));
+  }
+
+  private async validateUser(userId: string): Promise<boolean> {
+    try {
+      const isValid = await this.userGateway.validateUsers([userId]);
+      return isValid;
+    } catch (error) {
+      return false;
+    }
   }
 }
