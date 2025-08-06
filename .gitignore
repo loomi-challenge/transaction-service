@@ -162,3 +162,5 @@ Desktop.ini
 
 # PM2 logs and pids
 .pm2/
+
+/src/generated/prisma
