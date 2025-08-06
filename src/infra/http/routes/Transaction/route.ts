@@ -7,11 +7,14 @@ import { FindTransactionController } from "../../controllers/Transaction/find-tr
 import { FindTransactionUseCase } from "@/application/usecases/Transaction/find-transaction.usecase";
 import { ListUserTransactionsController } from "../../controllers/Transaction/list-user-transactions.controller";
 import { ListUserTransactionsUseCase } from "@/application/usecases/Transaction/list-user-transactions.usecase";
+import { RabbitUserValidationGateway } from "@/infra/rabbitmq/user-validation";
 
 export const transactionRouter = Router();
 const transactionRepository = new TransactionRepository();
+const userValidationGateway = new RabbitUserValidationGateway();
 const createTransactionUseCase = new CreateTransactionUseCase(
-  transactionRepository
+  transactionRepository,
+  userValidationGateway
 );
 const createTransactionController = new CreateTransactionController(
   createTransactionUseCase
