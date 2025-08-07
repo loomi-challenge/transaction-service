@@ -13,10 +13,17 @@ export class TransactionRepository implements ITransactionGateway {
       },
     });
   }
-  async findTransactionById(id: string): Promise<ITransaction | null> {
+  async findTransactionById({
+    id,
+    userId,
+  }: {
+    id: string;
+    userId: string;
+  }): Promise<ITransaction | null> {
     const transaction = await prisma.transaction.findUnique({
       where: {
         id,
+        OR: [{ senderUserId: userId }, { receiverUserId: userId }],
       },
     });
     return transaction;

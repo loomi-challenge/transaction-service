@@ -10,12 +10,22 @@ interface FindTransactionOutput {
 }
 
 export class FindTransactionUseCase
-  implements IUseCase<string, FindTransactionOutput | null>
+  implements
+    IUseCase<{ id: string; userId: string }, FindTransactionOutput | null>
 {
   constructor(private readonly transactionGateway: ITransactionGateway) {}
 
-  async execute(id: string): Promise<FindTransactionOutput | null> {
-    const transaction = await this.transactionGateway.findTransactionById(id);
+  async execute({
+    id,
+    userId,
+  }: {
+    id: string;
+    userId: string;
+  }): Promise<FindTransactionOutput | null> {
+    const transaction = await this.transactionGateway.findTransactionById({
+      id,
+      userId,
+    });
     if (!transaction) {
       throw new Error("Transação não encontrada");
     }

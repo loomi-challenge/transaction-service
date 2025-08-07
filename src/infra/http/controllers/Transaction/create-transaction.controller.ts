@@ -21,9 +21,10 @@ export class CreateTransactionController
   ) {}
 
   async handle(input: ControllerInput): Promise<ControllerOutput> {
-    const { senderUserId, receiverUserId, amount, description } = input.body;
+    const userId = input.headers["x-user-id"] as string;
+    const { receiverUserId, amount, description } = input.body;
     const transaction = await this.createTransactionUseCase.execute({
-      senderUserId,
+      senderUserId: userId,
       receiverUserId,
       amount,
       description,

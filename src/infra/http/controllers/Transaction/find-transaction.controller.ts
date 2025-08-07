@@ -18,7 +18,11 @@ export class FindTransactionController
 
   async handle(input: ControllerInput): Promise<ControllerOutput> {
     const { id } = input.params;
-    const transaction = await this.findTransactionUseCase.execute(id);
+    const userId = input.headers["x-user-id"] as string;
+    const transaction = await this.findTransactionUseCase.execute({
+      id,
+      userId,
+    });
 
     return {
       statusCode: 200,

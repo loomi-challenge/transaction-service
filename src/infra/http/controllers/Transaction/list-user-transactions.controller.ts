@@ -1,14 +1,7 @@
 import { ListUserTransactionsUseCase } from "@/application/usecases/Transaction/list-user-transactions.usecase";
 import { ControllerInput, ControllerOutput, IController } from "../IController";
 
-type ListUserTransactionsParams = {
-  userId: string;
-};
-
-type ListUserTransactionsControllerInput =
-  ControllerInput<ListUserTransactionsParams> & {
-    params: ListUserTransactionsParams;
-  };
+type ListUserTransactionsControllerInput = ControllerInput<{}>;
 
 export class ListUserTransactionsController
   implements IController<ListUserTransactionsControllerInput, ControllerOutput>
@@ -18,7 +11,7 @@ export class ListUserTransactionsController
   ) {}
 
   async handle(input: ControllerInput): Promise<ControllerOutput> {
-    const { userId } = input.params;
+    const userId = input.headers["x-user-id"] as string;
     const transactions = await this.listUserTransactionsUseCase.execute(userId);
     return {
       statusCode: 200,

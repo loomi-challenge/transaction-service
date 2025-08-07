@@ -39,8 +39,8 @@ const listUserTransactionsController = new ListUserTransactionsController(
 );
 
 transactionRouter.post("/", expressAdaptRoute(createTransactionController));
-transactionRouter.get("/:id", expressAdaptRoute(findTransactionController));
 transactionRouter.get(
-  "/user/:userId",
+  "/user",
   expressAdaptRoute(listUserTransactionsController)
 );
+transactionRouter.get("/:id", expressAdaptRoute(findTransactionController));

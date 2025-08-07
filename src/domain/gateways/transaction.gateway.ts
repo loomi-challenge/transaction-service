@@ -2,6 +2,12 @@ import { ITransaction } from "../entities/Transaction/interfaces/transaction.int
 
 export interface ITransactionGateway {
   createTransaction(data: ITransaction): Promise<void>;
-  findTransactionById(id: string): Promise<ITransaction | null>;
+  findTransactionById({
+    id,
+    userId,
+  }: {
+    id: string;
+    userId: string;
+  }): Promise<ITransaction | null>;
   getListUserTransactions(userId: string): Promise<ITransaction[]>;
 }
