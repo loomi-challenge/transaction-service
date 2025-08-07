@@ -1,5 +1,6 @@
 import { ITransactionGateway } from "@/domain/gateways/transaction.gateway";
 import { IUseCase } from "../IUsecase";
+import { inject, injectable } from "tsyringe";
 
 interface FindTransactionOutput {
   id: string;
@@ -9,11 +10,15 @@ interface FindTransactionOutput {
   description: string;
 }
 
+@injectable()
 export class FindTransactionUseCase
   implements
     IUseCase<{ id: string; userId: string }, FindTransactionOutput | null>
 {
-  constructor(private readonly transactionGateway: ITransactionGateway) {}
+  constructor(
+    @inject("TransactionRepository")
+    private readonly transactionGateway: ITransactionGateway
+  ) {}
 
   async execute({
     id,

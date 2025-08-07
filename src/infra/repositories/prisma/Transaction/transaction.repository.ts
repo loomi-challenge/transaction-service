@@ -1,7 +1,9 @@
 import { ITransaction } from "@/domain/entities/Transaction/interfaces/transaction.interface";
 import { ITransactionGateway } from "@/domain/gateways/transaction.gateway";
 import { prisma } from "@/package/prisma";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class TransactionRepository implements ITransactionGateway {
   async createTransaction(data: ITransaction): Promise<void> {
     await prisma.transaction.create({

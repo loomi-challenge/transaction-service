@@ -1,12 +1,15 @@
 import { ListUserTransactionsUseCase } from "@/application/usecases/Transaction/list-user-transactions.usecase";
 import { ControllerInput, ControllerOutput, IController } from "../IController";
+import { inject, injectable } from "tsyringe";
 
 type ListUserTransactionsControllerInput = ControllerInput<{}>;
 
+@injectable()
 export class ListUserTransactionsController
   implements IController<ListUserTransactionsControllerInput, ControllerOutput>
 {
   constructor(
+    @inject("ListUserTransactionsUseCase")
     private readonly listUserTransactionsUseCase: ListUserTransactionsUseCase
   ) {}
 

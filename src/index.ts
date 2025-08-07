@@ -1,4 +1,6 @@
-import express, { Request, Response } from "express";
+import "reflect-metadata";
+import "./infra/config/container";
+import express from "express";
 import dotenv from "dotenv";
 import { transactionRouter } from "./infra/http/routes/Transaction/route";
 

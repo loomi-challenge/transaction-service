@@ -4,6 +4,7 @@ import { Transaction } from "@/domain/entities/Transaction";
 import { randomUUID } from "crypto";
 import { IUserValidationGateway } from "@/domain/gateways/user-validation.gateway";
 import { IUserBalanceGateway } from "@/domain/gateways/user-balance.gateway";
+import { inject, injectable } from "tsyringe";
 
 interface CreateTransactionInput {
   senderUserId: string;
@@ -20,12 +21,16 @@ interface CreateTransactionOutput {
   description: string;
 }
 
+@injectable()
 export class CreateTransactionUseCase
   implements IUseCase<CreateTransactionInput, CreateTransactionOutput>
 {
   constructor(
+    @inject("TransactionRepository")
     private readonly transactionGateway: ITransactionGateway,
+    @inject("UserValidationGateway")
     private readonly userValidationGateway: IUserValidationGateway,
+    @inject("UserBalanceGateway")
     private readonly userBalanceGateway: IUserBalanceGateway
   ) {}
 
