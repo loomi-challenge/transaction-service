@@ -4,6 +4,7 @@ import { expressAdaptRoute } from "../../adapters/express";
 import { FindTransactionController } from "../../controllers/Transaction/find-transaction.controller";
 import { ListUserTransactionsController } from "../../controllers/Transaction/list-user-transactions.controller";
 import { container } from "@/infra/config/container";
+import { validateCreateTransaction } from "@/infra/validators/zod/create-transaction.validator";
 
 export const transactionRouter = Router();
 
@@ -17,7 +18,11 @@ const listUserTransactionsController = container.resolve(
   ListUserTransactionsController
 );
 
-transactionRouter.post("/", expressAdaptRoute(createTransactionController));
+transactionRouter.post(
+  "/",
+  validateCreateTransaction,
+  expressAdaptRoute(createTransactionController)
+);
 transactionRouter.get(
   "/user",
   expressAdaptRoute(listUserTransactionsController)
