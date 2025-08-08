@@ -46,4 +46,16 @@ export class Transaction implements ITransaction {
   get updatedAt(): Date {
     return this._updatedAt;
   }
+
+  toObject(): ITransaction {
+    return {
+      id: this._id,
+      senderUserId: this._senderUserId,
+      receiverUserId: this._receiverUserId,
+      amount: this._amount,
+      description: this._description,
+      createdAt: this._createdAt,
+      updatedAt: this._updatedAt,
+    };
+  }
 }

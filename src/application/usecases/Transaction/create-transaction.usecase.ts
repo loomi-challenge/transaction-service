@@ -3,7 +3,6 @@ import { IUseCase } from "../IUsecase";
 import { Transaction } from "@/domain/entities/Transaction";
 import { randomUUID } from "crypto";
 import { IUserValidationGateway } from "@/domain/gateways/user-validation.gateway";
-import { IUserBalanceGateway } from "@/domain/gateways/user-balance.gateway";
 import { inject, injectable } from "tsyringe";
 
 interface CreateTransactionInput {
@@ -29,9 +28,7 @@ export class CreateTransactionUseCase
     @inject("TransactionRepository")
     private readonly transactionGateway: ITransactionGateway,
     @inject("UserValidationGateway")
-    private readonly userValidationGateway: IUserValidationGateway,
-    @inject("UserBalanceGateway")
-    private readonly userBalanceGateway: IUserBalanceGateway
+    private readonly userValidationGateway: IUserValidationGateway
   ) {}
 
   async execute(
@@ -42,6 +39,15 @@ export class CreateTransactionUseCase
       input.senderUserId,
       input.receiverUserId
     );
+    const isSenderBalanceEnough =
+      await this.userValidationGateway.checkSenderBalance({
+        senderUserId: input.senderUserId,
+        amount: input.amount,
+      });
+
+    if (!isSenderBalanceEnough) {
+      throw new Error("Saldo insuficiente!");
+    }
     if (!isValid) {
       throw new Error("Invalid users");
     }
@@ -56,13 +62,13 @@ export class CreateTransactionUseCase
     });
     await this.transactionGateway.createTransaction(transaction);
 
-    await this.userBalanceGateway.updateUserBalance({
+    await this.userValidationGateway.updateUserBalance({
       senderUserId: input.senderUserId,
       receiverUserId: input.receiverUserId,
       amount: input.amount,
     });
 
-    return transaction;
+    return transaction.toObject();
   }
 
   async validateUsers(
