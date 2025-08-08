@@ -28,7 +28,7 @@ export class CreateTransactionUseCase
     @inject("TransactionRepository")
     private readonly transactionGateway: ITransactionGateway,
     @inject("UserValidationGateway")
-    private readonly userValidationGateway: IUserValidationGateway,
+    private readonly userValidationGateway: IUserValidationGateway
   ) {}
 
   async execute(
@@ -39,6 +39,15 @@ export class CreateTransactionUseCase
       input.senderUserId,
       input.receiverUserId
     );
+    const isSenderBalanceEnough =
+      await this.userValidationGateway.checkSenderBalance({
+        senderUserId: input.senderUserId,
+        amount: input.amount,
+      });
+
+    if (!isSenderBalanceEnough) {
+      throw new Error("Saldo insuficiente!");
+    }
     if (!isValid) {
       throw new Error("Invalid users");
     }
@@ -59,7 +68,7 @@ export class CreateTransactionUseCase
       amount: input.amount,
     });
 
-    return transaction;
+    return transaction.toObject();
   }
 
   async validateUsers(
