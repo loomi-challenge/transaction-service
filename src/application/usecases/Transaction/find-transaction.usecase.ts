@@ -1,6 +1,7 @@
 import { ITransactionGateway } from "@/domain/gateways/transaction.gateway";
 import { IUseCase } from "../IUsecase";
 import { inject, injectable } from "tsyringe";
+import { AppError } from "@/domain/errors/app-error";
 
 interface FindTransactionOutput {
   id: string;
@@ -32,7 +33,7 @@ export class FindTransactionUseCase
       userId,
     });
     if (!transaction) {
-      throw new Error("Transação não encontrada");
+      throw new AppError("Transação não encontrada", 404);
     }
     return {
       id: transaction.id,

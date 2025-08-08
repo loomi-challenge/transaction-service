@@ -2,6 +2,7 @@ import { IUserValidationGateway } from "@/domain/gateways/user-validation.gatewa
 import { IUseCase } from "../IUsecase";
 import { ITransactionGateway } from "@/domain/gateways/transaction.gateway";
 import { inject, injectable } from "tsyringe";
+import { AppError } from "@/domain/errors/app-error";
 
 interface ListUserTransactionsOutput {
   id: string;
@@ -25,7 +26,7 @@ export class ListUserTransactionsUseCase
   async execute(userId: string): Promise<ListUserTransactionsOutput[]> {
     const isValid = await this.validateUser(userId);
     if (!isValid) {
-      throw new Error("Usuário não encontrado");
+      throw new AppError("Usuário não encontrado", 404);
     }
     const transactions = await this.transactionGateway.getListUserTransactions(
       userId
