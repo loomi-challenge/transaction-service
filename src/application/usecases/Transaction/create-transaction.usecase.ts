@@ -4,6 +4,7 @@ import { Transaction } from "@/domain/entities/Transaction";
 import { randomUUID } from "crypto";
 import { IUserValidationGateway } from "@/domain/gateways/user-validation.gateway";
 import { inject, injectable } from "tsyringe";
+import { AppError } from "@/domain/errors/app-error";
 
 interface CreateTransactionInput {
   senderUserId: string;
@@ -46,10 +47,10 @@ export class CreateTransactionUseCase
       });
 
     if (!isSenderBalanceEnough) {
-      throw new Error("Saldo insuficiente!");
+      throw new AppError("Saldo insuficiente para realizar a transação", 400);
     }
     if (!isValid) {
-      throw new Error("Invalid users");
+      throw new AppError("Usuários inválidos para realizar a transação", 400);
     }
     const transaction = new Transaction({
       id: randomUUID(),
