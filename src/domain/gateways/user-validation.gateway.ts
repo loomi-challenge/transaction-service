@@ -9,4 +9,11 @@ export interface IUserValidationGateway {
     receiverUserId: string;
     amount: number;
   }): Promise<void>;
+  checkSenderBalance({
+    senderUserId,
+    amount,
+  }: {
+    senderUserId: string;
+    amount: number;
+  }): Promise<boolean>;
 }

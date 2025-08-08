@@ -189,6 +189,100 @@ export class RabbitUserValidationGateway implements IUserValidationGateway {
     }
   }
 
+  async checkSenderBalance({
+    senderUserId,
+    amount,
+  }: {
+    senderUserId: string;
+    amount: number;
+  }): Promise<boolean> {
+    const correlationId = crypto.randomUUID();
+    console.log(`[RabbitUserValidationGateway] Starting balance check for sender`, {
+      senderUserId,
+      amount,
+      correlationId
+    });
+
+    try {
+      const channel = await this.getChannel();
+      const queue = "check-balance";
+      const replyQueue = await channel.assertQueue("", { exclusive: true });
+      const replyQueueName = replyQueue.queue;
+
+      console.log(`[RabbitUserValidationGateway] Asserting queue: ${queue} and temporary reply queue: ${replyQueueName}`);
+      
+      await channel.assertQueue(queue, { durable: true });
+
+      const message = {
+        senderUserId,
+        amount,
+      };
+
+      console.log(`[RabbitUserValidationGateway] Sending balance check message to queue: ${queue}`, {
+        correlationId,
+        senderUserId,
+        amount,
+        replyTo: replyQueueName
+      });
+
+      channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)), {
+        correlationId,
+        replyTo: replyQueueName,
+      });
+
+      console.log(`[RabbitUserValidationGateway] Balance check message sent, waiting for response... (correlationId: ${correlationId})`);
+
+      return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          const errorMsg = `Timeout waiting for balance check response (correlationId: ${correlationId})`;
+          console.error(`[RabbitUserValidationGateway] ERROR: ${errorMsg}`);
+          reject(new Error(errorMsg));
+        }, 10000); 
+
+        channel.consume(
+          replyQueueName,
+          (msg: any) => {
+            if (msg) {
+              const msgCorrelationId = msg.properties.correlationId;
+              
+              if (msgCorrelationId === correlationId) {
+                console.log(`[RabbitUserValidationGateway] Received balance check response for correlationId: ${correlationId}`);
+                
+                clearTimeout(timeout);
+                const response = JSON.parse(msg.content.toString());
+                channel.ack(msg);
+                
+                console.log(`[RabbitUserValidationGateway] Balance check completed`, {
+                  correlationId,
+                  hasSufficientBalance: response.hasSufficientBalance,
+                  senderUserId,
+                  amount,
+                  currentBalance: response.currentBalance,
+                  fullResponse: response
+                });
+                
+                resolve(response.hasSufficientBalance);
+              } else {
+                console.log(`[RabbitUserValidationGateway] Received balance check message with different correlationId`, {
+                  expected: correlationId,
+                  received: msgCorrelationId
+                });
+              }
+            }
+          },
+          { noAck: false }
+        );
+      });
+    } catch (error) {
+      console.error(`[RabbitUserValidationGateway] ERROR: Failed to check sender balance (correlationId: ${correlationId})`, {
+        error: error instanceof Error ? error.message : error,
+        senderUserId,
+        amount
+      });
+      throw new Error("Failed to check sender balance via RabbitMQ");
+    }
+  }
+
   async disconnect(): Promise<void> {
     console.log("[RabbitUserValidationGateway] Starting disconnect process");
     
