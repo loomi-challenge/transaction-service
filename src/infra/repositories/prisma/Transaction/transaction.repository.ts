@@ -1,7 +1,9 @@
 import { ITransaction } from "@/domain/entities/Transaction/interfaces/transaction.interface";
 import { ITransactionGateway } from "@/domain/gateways/transaction.gateway";
 import { prisma } from "@/package/prisma";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class TransactionRepository implements ITransactionGateway {
   async createTransaction(data: ITransaction): Promise<void> {
     await prisma.transaction.create({
@@ -13,10 +15,17 @@ export class TransactionRepository implements ITransactionGateway {
       },
     });
   }
-  async findTransactionById(id: string): Promise<ITransaction | null> {
+  async findTransactionById({
+    id,
+    userId,
+  }: {
+    id: string;
+    userId: string;
+  }): Promise<ITransaction | null> {
     const transaction = await prisma.transaction.findUnique({
       where: {
         id,
+        OR: [{ senderUserId: userId }, { receiverUserId: userId }],
       },
     });
     return transaction;

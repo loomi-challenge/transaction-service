@@ -1,46 +1,25 @@
 import { Router } from "express";
 import { CreateTransactionController } from "../../controllers/Transaction/create-transaction.controller";
-import { CreateTransactionUseCase } from "@/application/usecases/Transaction/create-transaction.usecase";
-import { TransactionRepository } from "@/infra/repositories/prisma/Transaction/transaction.repository";
 import { expressAdaptRoute } from "../../adapters/express";
 import { FindTransactionController } from "../../controllers/Transaction/find-transaction.controller";
-import { FindTransactionUseCase } from "@/application/usecases/Transaction/find-transaction.usecase";
 import { ListUserTransactionsController } from "../../controllers/Transaction/list-user-transactions.controller";
-import { ListUserTransactionsUseCase } from "@/application/usecases/Transaction/list-user-transactions.usecase";
-import { RabbitUserValidationGateway } from "@/infra/rabbitmq/user-validation";
-import { RabbitUserBalanceGateway } from "@/infra/rabbitmq/user-balance";
+import { container } from "@/infra/config/container";
 
 export const transactionRouter = Router();
-const transactionRepository = new TransactionRepository();
-const userValidationGateway = new RabbitUserValidationGateway();
-const userBalanceGateway = new RabbitUserBalanceGateway();
-const createTransactionUseCase = new CreateTransactionUseCase(
-  transactionRepository,
-  userValidationGateway,
-  userBalanceGateway
-);
-const createTransactionController = new CreateTransactionController(
-  createTransactionUseCase
+
+const createTransactionController = container.resolve(
+  CreateTransactionController
 );
 
-const findTransactionUseCase = new FindTransactionUseCase(
-  transactionRepository
-);
-const findTransactionController = new FindTransactionController(
-  findTransactionUseCase
-);
+const findTransactionController = container.resolve(FindTransactionController);
 
-const listUserTransactionsUseCase = new ListUserTransactionsUseCase(
-  transactionRepository,
-  userValidationGateway
-);
-const listUserTransactionsController = new ListUserTransactionsController(
-  listUserTransactionsUseCase
+const listUserTransactionsController = container.resolve(
+  ListUserTransactionsController
 );
 
 transactionRouter.post("/", expressAdaptRoute(createTransactionController));
-transactionRouter.get("/:id", expressAdaptRoute(findTransactionController));
 transactionRouter.get(
-  "/user/:userId",
+  "/user",
   expressAdaptRoute(listUserTransactionsController)
 );
+transactionRouter.get("/:id", expressAdaptRoute(findTransactionController));

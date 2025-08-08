@@ -1,5 +1,6 @@
 import { FindTransactionUseCase } from "@/application/usecases/Transaction/find-transaction.usecase";
 import { ControllerInput, ControllerOutput, IController } from "../IController";
+import { inject, injectable } from "tsyringe";
 
 type FindTransactionParams = {
   id: string;
@@ -9,16 +10,22 @@ type FindTransactionControllerInput = ControllerInput<FindTransactionParams> & {
   params: FindTransactionParams;
 };
 
+@injectable()
 export class FindTransactionController
   implements IController<FindTransactionControllerInput, ControllerOutput>
 {
   constructor(
+    @inject("FindTransactionUseCase")
     private readonly findTransactionUseCase: FindTransactionUseCase
   ) {}
 
   async handle(input: ControllerInput): Promise<ControllerOutput> {
     const { id } = input.params;
-    const transaction = await this.findTransactionUseCase.execute(id);
+    const userId = input.headers["x-user-id"] as string;
+    const transaction = await this.findTransactionUseCase.execute({
+      id,
+      userId,
+    });
 
     return {
       statusCode: 200,

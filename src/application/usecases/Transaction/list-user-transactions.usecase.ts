@@ -1,6 +1,7 @@
 import { IUserValidationGateway } from "@/domain/gateways/user-validation.gateway";
 import { IUseCase } from "../IUsecase";
 import { ITransactionGateway } from "@/domain/gateways/transaction.gateway";
+import { inject, injectable } from "tsyringe";
 
 interface ListUserTransactionsOutput {
   id: string;
@@ -10,11 +11,14 @@ interface ListUserTransactionsOutput {
   description: string;
 }
 
+@injectable()
 export class ListUserTransactionsUseCase
   implements IUseCase<string, ListUserTransactionsOutput[]>
 {
   constructor(
+    @inject("TransactionRepository")
     private readonly transactionGateway: ITransactionGateway,
+    @inject("UserValidationGateway")
     private readonly userGateway: IUserValidationGateway
   ) {}
 

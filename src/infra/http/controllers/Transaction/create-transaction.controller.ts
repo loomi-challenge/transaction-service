@@ -1,5 +1,6 @@
 import { CreateTransactionUseCase } from "@/application/usecases/Transaction/create-transaction.usecase";
 import { ControllerInput, ControllerOutput, IController } from "../IController";
+import { inject, injectable } from "tsyringe";
 
 type CreateTransactionBody = {
   senderUserId: string;
@@ -13,17 +14,20 @@ type CreateTransactionControllerInput =
     body: CreateTransactionBody;
   };
 
+@injectable()
 export class CreateTransactionController
   implements IController<CreateTransactionControllerInput, ControllerOutput>
 {
   constructor(
+    @inject("CreateTransactionUseCase")
     private readonly createTransactionUseCase: CreateTransactionUseCase
   ) {}
 
   async handle(input: ControllerInput): Promise<ControllerOutput> {
-    const { senderUserId, receiverUserId, amount, description } = input.body;
+    const userId = input.headers["x-user-id"] as string;
+    const { receiverUserId, amount, description } = input.body;
     const transaction = await this.createTransactionUseCase.execute({
-      senderUserId,
+      senderUserId: userId,
       receiverUserId,
       amount,
       description,

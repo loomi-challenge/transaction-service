@@ -1,5 +1,6 @@
 import { ITransactionGateway } from "@/domain/gateways/transaction.gateway";
 import { IUseCase } from "../IUsecase";
+import { inject, injectable } from "tsyringe";
 
 interface FindTransactionOutput {
   id: string;
@@ -9,13 +10,27 @@ interface FindTransactionOutput {
   description: string;
 }
 
+@injectable()
 export class FindTransactionUseCase
-  implements IUseCase<string, FindTransactionOutput | null>
+  implements
+    IUseCase<{ id: string; userId: string }, FindTransactionOutput | null>
 {
-  constructor(private readonly transactionGateway: ITransactionGateway) {}
+  constructor(
+    @inject("TransactionRepository")
+    private readonly transactionGateway: ITransactionGateway
+  ) {}
 
-  async execute(id: string): Promise<FindTransactionOutput | null> {
-    const transaction = await this.transactionGateway.findTransactionById(id);
+  async execute({
+    id,
+    userId,
+  }: {
+    id: string;
+    userId: string;
+  }): Promise<FindTransactionOutput | null> {
+    const transaction = await this.transactionGateway.findTransactionById({
+      id,
+      userId,
+    });
     if (!transaction) {
       throw new Error("Transação não encontrada");
     }
